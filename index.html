@@ -43,6 +43,11 @@
             pointer-events: none;
             z-index: 100;
         }
+        
+        #ui-overlay button {
+            pointer-events: all !important;
+            z-index: 1000 !important;
+        }
 
         #container {
             cursor: pointer;
@@ -138,8 +143,8 @@
         
         <div id="ui-overlay">
             <button id="start-button">🎄 Запустить AR</button>
-            <button id="reset-button" class="hidden" style="position: absolute; top: 20px; right: 20px; background: #ff6b6b; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer;">🔄 Сброс</button>
-            <button id="lights-button" class="hidden" style="position: absolute; top: 20px; right: 100px; background: #4ecdc4; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer;">💡 Огни</button>
+            <button id="reset-button" class="hidden" style="position: absolute; top: 20px; right: 20px; background: #ff6b6b; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; pointer-events: all; z-index: 1000;">🔄 Сброс</button>
+            <button id="lights-button" class="hidden" style="position: absolute; top: 20px; right: 100px; background: #4ecdc4; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; pointer-events: all; z-index: 1000;">💡 Огни</button>
             
             <div id="status" class="hidden">
                 <div>Статус: <span id="status-text">Готов</span></div>
@@ -193,7 +198,41 @@
                 this.canvas = document.getElementById('canvas');
                 
                 this.setupEventListeners();
+                this.setupResizeHandler();
                 this.updateStatus('Инициализация завершена');
+            }
+            
+            setupResizeHandler() {
+                // Обработчик изменения размера окна и поворота устройства
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        this.handleResize();
+                    }, 100);
+                });
+                
+                // Обработчик поворота устройства (для мобильных)
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        this.handleResize();
+                    }, 200);
+                });
+            }
+            
+            handleResize() {
+                console.log('Пересчет размеров...', window.innerWidth, 'x', window.innerHeight);
+                
+                // Обновляем размер камеры и рендерера
+                if (this.camera && this.renderer) {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                    this.renderer.setPixelRatio(window.devicePixelRatio);
+                    
+                    console.log('Размеры обновлены');
+                }
             }
 
             setupEventListeners() {
