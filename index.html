@@ -698,11 +698,29 @@
                 const rect = this.canvas.getBoundingClientRect();
                 const clientX = event.clientX ?? event.touches[0]?.clientX ?? 0;
                 const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
-                const x = ((clientX - rect.left) / rect.width) * 2 - 1;
-                const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+                
+                // Нормализуем координаты с учетом размера экрана
+                const normalizedX = ((clientX - rect.left) / rect.width) * 2 - 1;
+                const normalizedY = -((clientY - rect.top) / rect.height) * 2 + 1;
+                
+                // Учитываем ориентацию экрана
+                const isPortrait = window.innerHeight > window.innerWidth;
+                let x, y;
+                
+                if (isPortrait) {
+                    // Вертикальная ориентация (мобильный)
+                    x = normalizedX * 0.3; // Уменьшаем диапазон по X
+                    y = normalizedY * 0.3 - 0.3; // Смещаем вниз, чтобы не закрывало лицо
+                } else {
+                    // Горизонтальная ориентация
+                    x = normalizedX * 0.5;
+                    y = normalizedY * 0.3 - 0.2;
+                }
 
-                // Размещаем елку в 3D пространстве (ниже по Y, чтобы не закрывала лицо)
-                this.treeModel.position.set(x * 1.5, y * 1.5 - 1, -2.5);
+                // Размещаем елку в центре камеры (прямо перед ней)
+                this.treeModel.position.set(x, y, -3);
+                
+                this.updateStatus(`Размер экрана: ${window.innerWidth}x${window.innerHeight}, ориентация: ${isPortrait ? 'portrait' : 'landscape'}`);
                 this.treeModel.visible = true;
                 this.treePlaced = true;
                 
@@ -745,11 +763,27 @@
                 const rect = this.canvas.getBoundingClientRect();
                 const clientX = event.clientX ?? event.touches[0]?.clientX ?? 0;
                 const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
-                const x = ((clientX - rect.left) / rect.width) * 2 - 1;
-                const y = -((clientY - rect.top) / rect.height) * 2 + 1;
+                
+                // Нормализуем координаты с учетом размера экрана
+                const normalizedX = ((clientX - rect.left) / rect.width) * 2 - 1;
+                const normalizedY = -((clientY - rect.top) / rect.height) * 2 + 1;
+                
+                // Учитываем ориентацию экрана
+                const isPortrait = window.innerHeight > window.innerWidth;
+                let x, y;
+                
+                if (isPortrait) {
+                    // Вертикальная ориентация (мобильный)
+                    x = normalizedX * 0.3;
+                    y = normalizedY * 0.3 - 0.3;
+                } else {
+                    // Горизонтальная ориентация
+                    x = normalizedX * 0.5;
+                    y = normalizedY * 0.3 - 0.2;
+                }
 
-                // Перемещаем елку в новую позицию (ниже, чтобы не закрывала лицо)
-                this.treeModel.position.set(x * 1.5, y * 1.5 - 1, -2.5);
+                // Перемещаем елку в новую позицию (в центре камеры)
+                this.treeModel.position.set(x, y, -3);
                 
                 // Огни автоматически последуют за елкой в animateHolidayLights()
                 
