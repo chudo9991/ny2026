@@ -403,10 +403,7 @@
                                 }
                             });
                             
-                            // Добавляем случайные украшения только для елок
-                            if (randomModel.includes('tree')) {
-                                this.addRandomOrnaments();
-                            }
+                            // Украшения уже есть в GLB модели
                             
                             this.scene.add(this.treeModel);
                             console.log('GLB модель загружена:', randomModel);
