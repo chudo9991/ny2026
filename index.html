@@ -709,16 +709,23 @@
                 
                 if (isPortrait) {
                     // Вертикальная ориентация (мобильный)
-                    x = normalizedX * 0.3; // Уменьшаем диапазон по X
-                    y = normalizedY * 0.3 - 0.3; // Смещаем вниз, чтобы не закрывало лицо
+                    // Учитываем соотношение сторон экрана
+                    const aspectRatio = window.innerWidth / window.innerHeight;
+                    x = normalizedX * 0.8 * aspectRatio; // Корректируем по aspect ratio
+                    y = normalizedY * 0.8; // Оставляем больше места по вертикали
                 } else {
                     // Горизонтальная ориентация
-                    x = normalizedX * 0.5;
-                    y = normalizedY * 0.3 - 0.2;
+                    x = normalizedX * 0.8;
+                    y = normalizedY * 0.5;
                 }
 
-                // Размещаем елку в центре камеры (прямо перед ней)
-                this.treeModel.position.set(x, y, -3);
+                // Размещаем елку в центре камеры с учетом размера экрана
+                // Z вычисляем динамически на основе высоты экрана
+                const baseZ = -3;
+                const aspectRatio = window.innerWidth / window.innerHeight;
+                const adjustedZ = baseZ * (1 / aspectRatio); // Корректируем Z под aspect ratio
+                
+                this.treeModel.position.set(x, y, adjustedZ);
                 
                 this.updateStatus(`Размер экрана: ${window.innerWidth}x${window.innerHeight}, ориентация: ${isPortrait ? 'portrait' : 'landscape'}`);
                 this.treeModel.visible = true;
@@ -774,16 +781,22 @@
                 
                 if (isPortrait) {
                     // Вертикальная ориентация (мобильный)
-                    x = normalizedX * 0.3;
-                    y = normalizedY * 0.3 - 0.3;
+                    // Учитываем соотношение сторон экрана
+                    const aspectRatio = window.innerWidth / window.innerHeight;
+                    x = normalizedX * 0.8 * aspectRatio; // Корректируем по aspect ratio
+                    y = normalizedY * 0.8; // Оставляем больше места по вертикали
                 } else {
                     // Горизонтальная ориентация
-                    x = normalizedX * 0.5;
-                    y = normalizedY * 0.3 - 0.2;
+                    x = normalizedX * 0.8;
+                    y = normalizedY * 0.5;
                 }
 
-                // Перемещаем елку в новую позицию (в центре камеры)
-                this.treeModel.position.set(x, y, -3);
+                // Перемещаем елку в новую позицию с учетом размера экрана
+                const baseZ = -3;
+                const aspectRatio = window.innerWidth / window.innerHeight;
+                const adjustedZ = baseZ * (1 / aspectRatio);
+                
+                this.treeModel.position.set(x, y, adjustedZ);
                 
                 // Огни автоматически последуют за елкой в animateHolidayLights()
                 
