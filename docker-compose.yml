@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  ar-app:
+    build: .
+    ports:
+      - "9000:80"
+    restart: unless-stopped
+    container_name: ny2026-ar-app
