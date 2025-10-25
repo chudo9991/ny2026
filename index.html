@@ -231,6 +231,14 @@
                     this.renderer.setSize(window.innerWidth, window.innerHeight);
                     this.renderer.setPixelRatio(window.devicePixelRatio);
                     
+                    // Адаптируем размер модели под новый размер экрана
+                    if (this.treeModel && this.treePlaced) {
+                        const newScale = this.getAdaptiveScale();
+                        const currentScale = this.treeModel.scale.x;
+                        const ratio = newScale / 0.3; // 0.3 - базовый масштаб для десктопа
+                        this.treeModel.scale.multiplyScalar(ratio / (currentScale / 0.3));
+                    }
+                    
                     console.log('Размеры обновлены');
                 }
             }
@@ -452,6 +460,20 @@
                 this.animate();
             }
 
+            getAdaptiveScale() {
+                // Адаптивный масштаб в зависимости от размера экрана
+                const isMobile = window.innerWidth < 768;
+                const isSmallScreen = window.innerWidth < 480;
+                
+                if (isSmallScreen) {
+                    return 0.2; // Очень маленькие экраны (мобильные)
+                } else if (isMobile) {
+                    return 0.25; // Средние мобильные
+                } else {
+                    return 0.3; // Десктоп
+                }
+            }
+
             async createTreeFromGLB() {
                 return new Promise((resolve, reject) => {
                     // Список доступных GLB моделей
@@ -477,8 +499,9 @@
                         (gltf) => {
                             this.treeModel = gltf.scene;
                             
-                            // Настраиваем модель
-                            this.treeModel.scale.set(0.3, 0.3, 0.3);
+                            // Настраиваем модель с адаптивным масштабом
+                            const scale = this.getAdaptiveScale();
+                            this.treeModel.scale.set(scale, scale, scale);
                             this.treeModel.visible = false;
                             
                             // Добавляем тени
@@ -649,16 +672,10 @@
             }
 
             placeTree(event) {
-                // Показываем на экране, что произошло
-                this.updateStatus('DEBUG: placeTree вызван');
-                
-                if (this.treePlaced) {
-                    this.updateStatus('DEBUG: Модель уже размещена!');
-                    return;
-                }
+                if (this.treePlaced) return;
                 
                 if (!this.treeModel) {
-                    this.updateStatus('ОШИБКА: Модель не загружена!');
+                    this.updateStatus('Модель ещё не загружена, подождите...');
                     return;
                 }
 
@@ -673,8 +690,6 @@
                 this.treeModel.position.set(x * 1.5, y * 1.5 - 1, -2.5);
                 this.treeModel.visible = true;
                 this.treePlaced = true;
-                
-                this.updateStatus('DEBUG: Модель размещена! pos=' + x.toFixed(2) + ',' + y.toFixed(2));
 
                 // Анимация появления
                 this.animateTreeAppearance();
