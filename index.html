@@ -758,27 +758,18 @@
             moveTree(event) {
                 if (!this.treePlaced || !this.treeModel) return;
 
-                // Проверяем, мобильное ли это устройство
-                const isMobile = window.innerWidth < 768;
-                
                 // Получаем координаты клика/тапа
                 const rect = this.canvas.getBoundingClientRect();
                 const clientX = event.clientX ?? event.touches[0]?.clientX ?? 0;
                 const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
                 
-                // Нормализуем координаты
-                const normalizedX = ((clientX - rect.left) / rect.width) * 2 - 1;
-                const normalizedY = -((clientY - rect.top) / rect.height) * 2 + 1;
-                
-                // Используем точные координаты клика для всех устройств
-                const x = normalizedX;
-                const y = normalizedY;
+                // Прямое позиционирование без нормализации
+                const x = (clientX - rect.left) / rect.width * 4 - 2; // Диапазон от -2 до 2
+                const y = -((clientY - rect.top) / rect.height * 4 - 2); // Диапазон от -2 до 2
+                const z = -3.5;
                 
                 // Перемещаем елку в новую позицию
-                const adjustedZ = -3.5;
-                this.treeModel.position.set(x, y, adjustedZ);
-                
-                // Огни автоматически последуют за елкой в animateHolidayLights()
+                this.treeModel.position.set(x, y, z);
                 
                 this.updateStatus('🎄 Елка перемещена!');
             }
@@ -792,7 +783,7 @@
                 this.treeModel.scale.z += delta;
                 
                 // Ограничиваем размер
-                const minScale = 0.1;
+                const minScale = 0.01;
                 const maxScale = 2.0;
                 
                 this.treeModel.scale.x = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.x));
