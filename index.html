@@ -651,10 +651,12 @@
             placeTree(event) {
                 if (this.treePlaced) return;
 
-                // Получаем координаты клика
+                // Получаем координаты клика/тапа (поддержка и мыши, и тача)
                 const rect = this.canvas.getBoundingClientRect();
-                const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                const clientX = event.clientX ?? event.touches[0]?.clientX ?? 0;
+                const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
+                const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+                const y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
                 // Размещаем елку в 3D пространстве (ниже по Y, чтобы не закрывала лицо)
                 this.treeModel.position.set(x * 1.5, y * 1.5 - 1, -2.5);
@@ -687,10 +689,12 @@
             moveTree(event) {
                 if (!this.treePlaced || !this.treeModel) return;
 
-                // Получаем координаты клика
+                // Получаем координаты клика/тапа (поддержка и мыши, и тача)
                 const rect = this.canvas.getBoundingClientRect();
-                const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-                const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                const clientX = event.clientX ?? event.touches[0]?.clientX ?? 0;
+                const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
+                const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+                const y = -((clientY - rect.top) / rect.height) * 2 + 1;
 
                 // Перемещаем елку в новую позицию (ниже, чтобы не закрывала лицо)
                 this.treeModel.position.set(x * 1.5, y * 1.5 - 1, -2.5);
