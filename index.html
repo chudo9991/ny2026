@@ -479,24 +479,28 @@
                     // Список доступных GLB моделей
                     const availableModels = [
                         'tree.glb',
-                        '3december2020__train_set.glb',
-                        'christmas_gift_boxs.glb',
                         'christmas_log.glb',
-                        'christmas_ornaments.glb',
                         'christmas_present.glb',
-                        'new_year_marathon_day_4.glb',
                         'snow_globe.glb',
                         'tree_3december_day_22.glb'
                     ];
                     
                     // Случайный выбор модели
                     const randomModel = availableModels[Math.floor(Math.random() * availableModels.length)];
+                    console.log('=== ЗАГРУЗКА МОДЕЛИ ===');
+                    console.log('Доступно моделей:', availableModels.length);
                     console.log('Выбрана случайная модель:', randomModel);
+                    console.log('Индекс:', availableModels.indexOf(randomModel));
+                    
+                    // Показываем на экране, какую модель загружаем
+                    this.updateStatus('Загрузка модели: ' + randomModel);
                     
                     const loader = new THREE.GLTFLoader();
+                    console.log('Пытаемся загрузить модель:', randomModel);
                     loader.load(
                         `./${randomModel}`,
                         (gltf) => {
+                            console.log('✅ Модель успешно загружена:', randomModel);
                             this.treeModel = gltf.scene;
                             
                             // Настраиваем модель с адаптивным масштабом
@@ -515,14 +519,19 @@
                             // Украшения уже есть в GLB модели
                             
                             this.scene.add(this.treeModel);
-                            console.log('GLB модель загружена:', randomModel);
+                            console.log('GLB модель добавлена в сцену');
                             resolve();
                         },
                         (progress) => {
-                            console.log('Загрузка модели:', (progress.loaded / progress.total * 100) + '%');
+                            if (progress.lengthComputable) {
+                                console.log('Загрузка модели:', (progress.loaded / progress.total * 100).toFixed(1) + '%');
+                            }
                         },
                         (error) => {
-                            console.error('Ошибка загрузки GLB модели:', error);
+                            console.error('❌ Ошибка загрузки GLB модели:', error);
+                            console.log('Создаем резервную геометрическую елку...');
+                            // Показываем ошибку на экране
+                            this.updateStatus('❌ Ошибка загрузки ' + randomModel + '. Создаём резервную модель...');
                             // Создаем простую елку как fallback
                             this.createSimpleTree();
                             resolve();
