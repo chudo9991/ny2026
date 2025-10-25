@@ -570,13 +570,20 @@
                 const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
                 const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-                // Размещаем елку в 3D пространстве
-                this.treeModel.position.set(x * 2, y * 2, -2);
+                // Размещаем елку в 3D пространстве (ниже по Y, чтобы не закрывала лицо)
+                this.treeModel.position.set(x * 1.5, y * 1.5 - 1, -2.5);
                 this.treeModel.visible = true;
                 this.treePlaced = true;
 
                 // Анимация появления
                 this.animateTreeAppearance();
+                
+                // Включаем невидимые огни
+                if (this.holidayLights) {
+                    this.holidayLights.forEach(light => {
+                        light.visible = true;
+                    });
+                }
 
                 this.updateStatus('🎄 Елка размещена! Кликните для перемещения');
                 
@@ -599,8 +606,8 @@
                 const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
                 const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
-                // Перемещаем елку в новую позицию
-                this.treeModel.position.set(x * 2, y * 2, -2);
+                // Перемещаем елку в новую позицию (ниже, чтобы не закрывала лицо)
+                this.treeModel.position.set(x * 1.5, y * 1.5 - 1, -2.5);
                 
                 // Огни автоматически последуют за елкой в animateHolidayLights()
                 
