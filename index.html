@@ -750,7 +750,11 @@
                 
                 // Загружаем новую случайную модель
                 console.log('Загружаем новую модель...');
-                this.createTreeFromGLB();
+                this.createTreeFromGLB().then(() => {
+                    // После загрузки модели создаем огни
+                    console.log('Создаем новые огни после загрузки модели');
+                    this.createHolidayLights();
+                });
                 
                 this.updateStatus('AR активен - кликните для размещения объекта');
                 console.log('=== СБРОС ЗАВЕРШЕН ===');
