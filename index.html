@@ -649,7 +649,18 @@
             }
 
             placeTree(event) {
-                if (this.treePlaced) return;
+                // Показываем на экране, что произошло
+                this.updateStatus('DEBUG: placeTree вызван');
+                
+                if (this.treePlaced) {
+                    this.updateStatus('DEBUG: Модель уже размещена!');
+                    return;
+                }
+                
+                if (!this.treeModel) {
+                    this.updateStatus('ОШИБКА: Модель не загружена!');
+                    return;
+                }
 
                 // Получаем координаты клика/тапа (поддержка и мыши, и тача)
                 const rect = this.canvas.getBoundingClientRect();
@@ -662,6 +673,8 @@
                 this.treeModel.position.set(x * 1.5, y * 1.5 - 1, -2.5);
                 this.treeModel.visible = true;
                 this.treePlaced = true;
+                
+                this.updateStatus('DEBUG: Модель размещена! pos=' + x.toFixed(2) + ',' + y.toFixed(2));
 
                 // Анимация появления
                 this.animateTreeAppearance();
