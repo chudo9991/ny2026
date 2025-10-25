@@ -1,31 +1,10 @@
 version: '3.8'
 
 services:
-  ar-app:
+  app:
     build: .
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
     restart: unless-stopped
-    container_name: ny2026-ar-app
-    environment:
-      - DOMAIN=your-domain.com  # Замените на ваш домен
-      - EMAIL=your-email@example.com  # Замените на ваш email
-    command: >
-      sh -c "nginx -g 'daemon off;' & 
-      sleep 5 && 
-      certbot --nginx -d $$DOMAIN --non-interactive --agree-tos --email $$EMAIL --redirect &&
-      nginx -s reload &&
-      wait"
-
-  # Автоматическое обновление сертификата
-  certbot-renew:
-    image: certbot/certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    restart: unless-stopped
+    container_name: ar-app

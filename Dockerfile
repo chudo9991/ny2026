@@ -1,16 +1,43 @@
 FROM nginx:alpine
 
-# Устанавливаем certbot
-RUN apk add --no-cache certbot certbot-nginx python3 py3-pip
+# Копируем все файлы в директорию nginx (исключая certs)
+COPY *.html *.glb /usr/share/nginx/html/
+COPY certs/ /etc/nginx/certs/
 
-# Копируем все файлы в директорию nginx
-COPY . /usr/share/nginx/html/
-
-# Копируем конфигурацию nginx
-COPY nginx.conf /etc/nginx/templates/default.conf.template
-
-# Создаем директорию для certbot
-RUN mkdir -p /var/www/certbot
+# Создаем конфигурацию nginx с поддержкой SSL
+RUN echo 'server { \
+    listen 80; \
+    server_name 45.144.30.194; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+    location ~* \.(glb|gltf)$ { \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
+} \
+server { \
+    listen 443 ssl http2; \
+    server_name 45.144.30.194; \
+    root /usr/share/nginx/html; \
+    index index.html; \
+    \
+    ssl_certificate /etc/nginx/certs/cert.pem; \
+    ssl_certificate_key /etc/nginx/certs/key.pem; \
+    ssl_protocols TLSv1.2 TLSv1.3; \
+    ssl_ciphers HIGH:!aNULL:!MD5; \
+    ssl_prefer_server_ciphers on; \
+    \
+    location / { \
+        try_files $uri $uri/ /index.html; \
+    } \
+    location ~* \.(glb|gltf)$ { \
+        expires 1y; \
+        add_header Cache-Control "public, immutable"; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80 443
 

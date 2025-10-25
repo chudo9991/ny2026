@@ -1,4 +1,6 @@
-certbot/
+certs/*
+!certs/.gitkeep
 .DS_Store
 *.log
 .env
+.cursor/

@@ -4,5 +4,6 @@ README.md
 .dockerignore
 Dockerfile
 docker-compose.yml
-certbot/
-*.sh
+generate-cert.sh
+*.md
+certs/
