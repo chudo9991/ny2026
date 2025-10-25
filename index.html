@@ -117,6 +117,19 @@
             #mobile-instructions {
                 display: block; /* Показываем мобильные инструкции */
             }
+            
+            /* Увеличиваем размеры кнопок и статуса на мобильных */
+            #reset-button, #lights-button {
+                padding: 15px 20px;
+                font-size: 16px;
+                z-index: 10001 !important;
+            }
+            
+            #status {
+                font-size: 14px;
+                padding: 15px 20px;
+                z-index: 10001 !important;
+            }
         }
 
         .hidden {
@@ -884,9 +897,13 @@
                 const lightsButton = document.getElementById('lights-button');
                 if (resetButton) {
                     resetButton.classList.remove('hidden');
+                    resetButton.style.display = 'block';
+                    resetButton.style.visibility = 'visible';
                 }
                 if (lightsButton) {
                     lightsButton.classList.remove('hidden');
+                    lightsButton.style.display = 'block';
+                    lightsButton.style.visibility = 'visible';
                 }
             }
 
@@ -895,6 +912,8 @@
                 if (status) {
                     if (show) {
                         status.classList.remove('hidden');
+                        status.style.display = 'block';
+                        status.style.visibility = 'visible';
                     } else {
                         status.classList.add('hidden');
                     }
