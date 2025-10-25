@@ -707,7 +707,7 @@
                 
                 // МАКСИМАЛЬНО ПРОСТО - клик = позиция (ограниченный диапазон против искажений)
                 const x = (clientX - rect.left) / rect.width * 6 - 3;
-                const y = ((clientY - rect.top) / rect.height * 6 - 3);
+                const y = -((clientY - rect.top) / rect.height * 6 - 3);
                 const z = -3.5;
                 
                 this.treeModel.position.set(x, y, z);
