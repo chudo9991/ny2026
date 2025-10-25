@@ -706,8 +706,8 @@
                 const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
                 
                 // Прямое позиционирование без ограничений для всех устройств
-                const x = (clientX - rect.left) / rect.width * 4 - 2; // Диапазон от -2 до 2
-                const y = -((clientY - rect.top) / rect.height * 4 - 2); // Диапазон от -2 до 2
+                const x = (clientX - rect.left) / rect.width * 20 - 10; // Диапазон от -10 до 10
+                const y = -((clientY - rect.top) / rect.height * 20 - 10); // Диапазон от -10 до 10
                 const z = -3.5;
                 
                 this.treeModel.position.set(x, y, z);
@@ -737,8 +737,8 @@
                 const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
                 
                 // Прямое позиционирование без нормализации
-                const x = (clientX - rect.left) / rect.width * 4 - 2; // Диапазон от -2 до 2
-                const y = -((clientY - rect.top) / rect.height * 4 - 2); // Диапазон от -2 до 2
+                const x = (clientX - rect.left) / rect.width * 20 - 10; // Диапазон от -10 до 10
+                const y = -((clientY - rect.top) / rect.height * 20 - 10); // Диапазон от -10 до 10
                 const z = -3.5;
                 
                 // Перемещаем елку в новую позицию
