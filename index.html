@@ -143,8 +143,8 @@
         
         <div id="ui-overlay">
             <button id="start-button">🎄 Запустить AR</button>
-            <button id="reset-button" class="hidden" style="position: absolute; top: 20px; right: 20px; background: #ff6b6b; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; z-index: 10000;">🔄 Сброс</button>
-            <button id="lights-button" class="hidden" style="position: absolute; top: 20px; right: 100px; background: #4ecdc4; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; z-index: 10000;">💡 Огни</button>
+            <button id="reset-button" style="position: absolute; top: 20px; right: 20px; background: #ff6b6b; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; z-index: 10000;">🔄 Сброс</button>
+            <button id="lights-button" style="position: absolute; top: 20px; right: 100px; background: #4ecdc4; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; z-index: 10000;">💡 Огни</button>
             
             <div id="status">
                 <div>Статус: <span id="status-text">Готов</span></div>
@@ -871,12 +871,10 @@
             }
 
             resetTree() {
-                
                 // Удаляем текущую модель из сцены
                 if (this.treeModel) {
                     this.scene.remove(this.treeModel);
                     this.treeModel = null;
-                } else {
                 }
                 
                 // Отключаем огни
@@ -885,7 +883,6 @@
                         this.scene.remove(light);
                     });
                     this.holidayLights = [];
-                } else {
                 }
                 
                 this.treePlaced = false;
@@ -900,11 +897,6 @@
             }
 
             toggleHolidayLights() {
-                
-                if (!this.holidayLights || this.holidayLights.length === 0) {
-                    return;
-                }
-
                 const lightsButton = document.getElementById('lights-button');
                 if (!lightsButton) {
                     return;
@@ -913,15 +905,18 @@
                 // Переключаем состояние
                 this.lightsOn = !this.lightsOn;
                 
-                this.holidayLights.forEach((light, index) => {
-                    if (this.lightsOn) {
-                        // Включаем огни
-                        light.intensity = 1.5;
-                    } else {
-                        // Выключаем огни
-                        light.intensity = 0;
-                    }
-                });
+                // Если огни существуют, управляем ими
+                if (this.holidayLights && this.holidayLights.length > 0) {
+                    this.holidayLights.forEach((light, index) => {
+                        if (this.lightsOn) {
+                            // Включаем огни
+                            light.intensity = 1.5;
+                        } else {
+                            // Выключаем огни
+                            light.intensity = 0;
+                        }
+                    });
+                }
 
                 // Обновляем текст кнопки
                 if (this.lightsOn) {
@@ -933,7 +928,6 @@
                     lightsButton.style.background = '#666';
                     this.updateStatus('🎄 Праздничные огни выключены');
                 }
-
             }
 
 
