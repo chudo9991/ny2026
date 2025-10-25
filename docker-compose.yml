@@ -6,3 +6,16 @@ services:
       - "9443:443"
     restart: unless-stopped
     container_name: ar-app
+
+  telegram-bot:
+    build: ./telegram_bot
+    container_name: ny2026_telegram_bot
+    restart: unless-stopped
+    env_file:
+      - ./telegram_bot/.env
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - BOT_USERNAME=${BOT_USERNAME}
+      - WEBAPP_URL=${WEBAPP_URL}
+    volumes:
+      - ./telegram_bot/logs:/app/logs
