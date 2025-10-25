@@ -170,11 +170,7 @@
                 </div>
             </div> -->
             
-            <!-- Лог для мобильных устройств -->
-            <div id="mobile-log" style="display: none; position: fixed; bottom: 80px; left: 10px; right: 10px; max-height: 200px; background: rgba(0,0,0,0.9); color: #0f0; padding: 10px; border-radius: 10px; overflow-y: auto; font-size: 11px; font-family: monospace; z-index: 2000; pointer-events: none;">
-                <div>Лог:</div>
-                <div id="log-content"></div>
-            </div>
+
         </div>
     </div>
 
@@ -965,32 +961,6 @@
                 const statusText = document.getElementById('status-text');
                 if (statusText) {
                     statusText.textContent = message;
-                }
-                
-                // Добавляем в мобильный лог
-                this.addToMobileLog(message);
-            }
-            
-            addToMobileLog(message) {
-                // Показываем лог только на мобильных
-                const isMobile = window.innerWidth < 768;
-                const logDiv = document.getElementById('mobile-log');
-                const logContent = document.getElementById('log-content');
-                
-                if (isMobile && logDiv && logContent) {
-                    logDiv.style.display = 'block';
-                    const time = new Date().toLocaleTimeString();
-                    const logEntry = document.createElement('div');
-                    logEntry.textContent = `[${time}] ${message}`;
-                    logContent.appendChild(logEntry);
-                    
-                    // Ограничиваем количество записей
-                    if (logContent.children.length > 50) {
-                        logContent.removeChild(logContent.firstChild);
-                    }
-                    
-                    // Скролл вниз
-                    logContent.scrollTop = logContent.scrollHeight;
                 }
             }
         }
