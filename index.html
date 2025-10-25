@@ -700,44 +700,17 @@
                     return;
                 }
 
-                // Проверяем, мобильное ли это устройство
-                const isMobile = window.innerWidth < 768;
-                const isPortrait = window.innerHeight > window.innerWidth;
+                // Получаем координаты клика/тапа
+                const rect = this.canvas.getBoundingClientRect();
+                const clientX = event.clientX ?? event.touches[0]?.clientX ?? 0;
+                const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
                 
-                let x, y, adjustedZ;
+                // Прямое позиционирование без ограничений для всех устройств
+                const x = (clientX - rect.left) / rect.width * 4 - 2; // Диапазон от -2 до 2
+                const y = -((clientY - rect.top) / rect.height * 4 - 2); // Диапазон от -2 до 2
+                const z = -3.5;
                 
-                if (isMobile) {
-                    // Мобильное устройство - размещаем модель в центре экрана
-                    x = 0;
-                    y = -0.2; // Немного ниже центра, чтобы не закрывало лицо
-                    
-                    // Рассчитываем Z и масштаб так, чтобы модель занимала 25% высоты экрана
-                    const fov = 75;
-                    const fovRadians = (fov * Math.PI) / 180;
-                    const desiredHeightPercent = 0.25; // 25% высоты
-                    adjustedZ = -window.innerHeight / (2 * Math.tan(fovRadians / 2)) * desiredHeightPercent * 0.01;
-                    
-                    // Корректируем масштаб модели под нужный размер
-                    const targetScale = window.innerHeight * 0.25 / 100; // 25% от высоты в единицах scale
-                    this.treeModel.scale.set(targetScale, targetScale, targetScale);
-                    
-                } else {
-                    // Десктоп - без ограничений, размещаем в точной позиции клика
-                    const rect = this.canvas.getBoundingClientRect();
-                    const clientX = event.clientX ?? event.touches[0]?.clientX ?? 0;
-                    const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
-                    
-                    const normalizedX = ((clientX - rect.left) / rect.width) * 2 - 1;
-                    const normalizedY = -((clientY - rect.top) / rect.height) * 2 + 1;
-                    
-                    // Без ограничений - используем точные координаты клика
-                    x = normalizedX;
-                    y = normalizedY;
-                    
-                    adjustedZ = -3.5; // Фиксированный Z
-                }
-                
-                this.treeModel.position.set(x, y, adjustedZ);
+                this.treeModel.position.set(x, y, z);
                 
                 this.treeModel.visible = true;
                 this.treePlaced = true;
