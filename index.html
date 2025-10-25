@@ -233,6 +233,15 @@
                         target: event.target.tagName
                     });
                     
+                    // Игнорируем клики по кнопкам и другим UI элементам
+                    if (event.target.tagName === 'BUTTON' || 
+                        event.target.closest('button') || 
+                        event.target.closest('#instructions') ||
+                        event.target.closest('#mobile-instructions')) {
+                        console.log('Клик по кнопке или инструкции - игнорируем');
+                        return;
+                    }
+                    
                     if (this.isARActive) {
                         if (!this.treePlaced) {
                             console.log('Размещаем елку...');
