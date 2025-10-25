@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # Получаем переменные окружения
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 BOT_USERNAME = os.getenv('BOT_USERNAME', 'simple_test_clvb2_bot')
-WEBAPP_URL = os.getenv('WEBAPP_URL', 'https://45.144.30.194:9443/')
+WEBAPP_URL = os.getenv('WEBAPP_URL', 'https://moretech2025clvb.ru:9443/')
 
 # Новогоднее поздравление
 NEW_YEAR_GREETING = """

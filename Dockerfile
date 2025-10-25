@@ -13,7 +13,7 @@ COPY certs/ /etc/nginx/certs/
 RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
 server {
     listen 80;
-    server_name 45.144.30.194;
+    server_name moretech2025clvb.ru;
     root /usr/share/nginx/html;
     index index.html;
     location / {
@@ -29,7 +29,7 @@ EOF
 # Добавляем HTTPS конфигурацию
 RUN echo 'server { \
     listen 443 ssl http2; \
-    server_name 45.144.30.194; \
+    server_name moretech2025clvb.ru; \
     root /usr/share/nginx/html; \
     index index.html; \
     ssl_certificate /etc/nginx/certs/cert.pem; \
