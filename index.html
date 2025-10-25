@@ -143,8 +143,8 @@
         
         <div id="ui-overlay">
             <button id="start-button">🎄 Запустить AR</button>
-            <button id="reset-button" style="position: absolute; top: 20px; right: 20px; background: #ff6b6b; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; z-index: 10000;">🔄 Сброс</button>
-            <button id="lights-button" style="position: absolute; top: 20px; right: 130px; background: #4ecdc4; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; z-index: 10000;">💡 Огни</button>
+            <button id="reset-button" class="hidden" style="position: absolute; top: 20px; right: 20px; background: #ff6b6b; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; z-index: 10000;">🔄 Сброс</button>
+            <button id="lights-button" class="hidden" style="position: absolute; top: 20px; right: 130px; background: #4ecdc4; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: bold; z-index: 10000;">💡 Огни</button>
             
             <div id="status">
                 <div>Статус: <span id="status-text">Готов</span></div>
@@ -372,7 +372,6 @@
                         this.treeModel.scale.y = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.y));
                         this.treeModel.scale.z = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.z));
                         
-                        this.updateStatus(`🎄 Размер елки: ${(this.treeModel.scale.x * 100).toFixed(0)}%`);
                     }
                 });
             }
@@ -397,9 +396,10 @@
                     this.video.addEventListener('loadedmetadata', () => {
                         this.setupThreeJS();
                         this.hideStartButton();
+                        this.showControlButtons();
                         this.showStatus(true);
                         this.isARActive = true;
-                        this.updateStatus('AR активен - нажмите на экран для размещения елки');
+                        this.updateStatus('AR активен');
                     });
                     
                 } catch (error) {
@@ -721,11 +721,6 @@
                     const targetScale = window.innerHeight * 0.25 / 100; // 25% от высоты в единицах scale
                     this.treeModel.scale.set(targetScale, targetScale, targetScale);
                     
-                    if (isPortrait) {
-                        this.updateStatus(`Мобильный портрет: модель в центре, 25% высоты экрана`);
-                    } else {
-                        this.updateStatus(`Мобильный альбом: модель в центре, 25% высоты экрана`);
-                    }
                 } else {
                     // Десктоп - без ограничений, размещаем в точной позиции клика
                     const rect = this.canvas.getBoundingClientRect();
@@ -757,17 +752,7 @@
                     });
                 }
 
-                this.updateStatus('🎄 Елка размещена! Кликните для перемещения');
-                
-                // Показываем кнопки управления
-                const resetButton = document.getElementById('reset-button');
-                const lightsButton = document.getElementById('lights-button');
-                if (resetButton) {
-                    resetButton.classList.remove('hidden');
-                }
-                if (lightsButton) {
-                    lightsButton.classList.remove('hidden');
-                }
+                this.updateStatus('Кликните для перемещения!');
             }
 
             moveTree(event) {
@@ -828,8 +813,6 @@
                 this.treeModel.scale.x = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.x));
                 this.treeModel.scale.y = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.y));
                 this.treeModel.scale.z = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.z));
-                
-                this.updateStatus(`🎄 Размер елки: ${(this.treeModel.scale.x * 100).toFixed(0)}%`);
             }
 
             animateTreeAppearance() {
@@ -893,7 +876,7 @@
                     this.createHolidayLights();
                 });
                 
-                this.updateStatus('AR активен - кликните для размещения объекта');
+                this.updateStatus('AR активен');
             }
 
             toggleHolidayLights() {
@@ -944,6 +927,17 @@
                 const startButton = document.getElementById('start-button');
                 if (startButton) {
                     startButton.classList.add('hidden');
+                }
+            }
+
+            showControlButtons() {
+                const resetButton = document.getElementById('reset-button');
+                const lightsButton = document.getElementById('lights-button');
+                if (resetButton) {
+                    resetButton.classList.remove('hidden');
+                }
+                if (lightsButton) {
+                    lightsButton.classList.remove('hidden');
                 }
             }
 
