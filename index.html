@@ -770,24 +770,9 @@
                 const normalizedX = ((clientX - rect.left) / rect.width) * 2 - 1;
                 const normalizedY = -((clientY - rect.top) / rect.height) * 2 + 1;
                 
-                let x, y;
-                
-                if (isMobile) {
-                    // Мобильные - сохраняем те же координаты
-                    const isPortrait = window.innerHeight > window.innerWidth;
-                    if (isPortrait) {
-                        const aspectRatio = window.innerWidth / window.innerHeight;
-                        x = normalizedX * 0.8 * aspectRatio;
-                        y = normalizedY * 0.8;
-                    } else {
-                        x = normalizedX * 0.8;
-                        y = normalizedY * 0.5;
-                    }
-                } else {
-                    // Десктоп - без ограничений, точные координаты
-                    x = normalizedX;
-                    y = normalizedY;
-                }
+                // Используем точные координаты клика для всех устройств
+                const x = normalizedX;
+                const y = normalizedY;
                 
                 // Перемещаем елку в новую позицию
                 const adjustedZ = -3.5;
