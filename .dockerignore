@@ -4,3 +4,5 @@ README.md
 .dockerignore
 Dockerfile
 docker-compose.yml
+certbot/
+*.sh

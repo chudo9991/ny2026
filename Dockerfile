@@ -1,19 +1,17 @@
 FROM nginx:alpine
 
+# Устанавливаем certbot
+RUN apk add --no-cache certbot certbot-nginx python3 py3-pip
+
 # Копируем все файлы в директорию nginx
 COPY . /usr/share/nginx/html/
 
-# Настраиваем nginx для работы с WebRTC
-RUN echo 'server { \
-    listen 80; \
-    server_name localhost; \
-    root /usr/share/nginx/html; \
-    index index.html; \
-    location / { \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+# Копируем конфигурацию nginx
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
-EXPOSE 80
+# Создаем директорию для certbot
+RUN mkdir -p /var/www/certbot
+
+EXPOSE 80 443
 
 CMD ["nginx", "-g", "daemon off;"]
