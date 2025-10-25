@@ -706,8 +706,8 @@
                 const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
                 
                 // МАКСИМАЛЬНО ПРОСТО - клик = позиция
-                const x = clientX - rect.left - rect.width / 2;
-                const y = clientY - rect.top - rect.height / 2;
+                const x = (clientX - rect.left) / rect.width * 4 - 2;
+                const y = -((clientY - rect.top) / rect.height * 4 - 2);
                 const z = -3.5;
                 
                 this.treeModel.position.set(x, y, z);
@@ -737,8 +737,8 @@
                 const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
                 
                 // МАКСИМАЛЬНО ПРОСТО - клик = позиция
-                const x = clientX - rect.left - rect.width / 2;
-                const y = clientY - rect.top - rect.height / 2;
+                const x = (clientX - rect.left) / rect.width * 4 - 2;
+                const y = -((clientY - rect.top) / rect.height * 4 - 2);
                 const z = -3.5;
                 
                 // Перемещаем елку в новую позицию
