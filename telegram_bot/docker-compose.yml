@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    build: .
+    container_name: ny2026_telegram_bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - BOT_USERNAME=${BOT_USERNAME}
+      - WEBAPP_URL=${WEBAPP_URL}
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - ny2026_network
+
+networks:
+  ny2026_network:
+    external: true
