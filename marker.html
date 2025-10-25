@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Маркер HIRO</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: white;
+            text-align: center;
+        }
+        
+        .marker-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .marker-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border: 1px solid #ccc;
+            margin: 20px 0;
+        }
+        
+        .instructions {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #2c5aa0;
+        }
+        
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 5px 0;
+        }
+        
+        .print-button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        
+        .print-button:hover {
+            background: #45a049;
+        }
+        
+        .back-button {
+            background: #2196F3;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .back-button:hover {
+            background: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="marker-container">
+        <h1>🎄 AR Маркер для Новогодней Елки</h1>
+        
+        <div class="instructions">
+            <h3>📋 Инструкции по использованию:</h3>
+            <ol>
+                <li><strong>Распечатайте маркер</strong> - нажмите кнопку "Печать" ниже</li>
+                <li><strong>Поместите маркер</strong> на плоскую поверхность (стол, пол)</li>
+                <li><strong>Откройте AR приложение</strong> в браузере</li>
+                <li><strong>Наведите камеру</strong> на распечатанный маркер</li>
+                <li><strong>Наслаждайтесь</strong> 3D елкой!</li>
+            </ol>
+        </div>
+        
+        <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/HIRO.jpg" 
+             alt="AR Маркер HIRO" 
+             class="marker-image">
+        
+        <div>
+            <button class="print-button" onclick="window.print()">🖨️ Печать маркера</button>
+            <a href="index-arjs.html" class="back-button">🎄 Вернуться к AR</a>
+        </div>
+        
+        <div class="instructions">
+            <h3>💡 Советы для лучшего результата:</h3>
+            <ul>
+                <li>Используйте хорошее освещение</li>
+                <li>Держите маркер неподвижно</li>
+                <li>Не закрывайте маркер руками</li>
+                <li>Распечатайте маркер в цвете</li>
+                <li>Размер маркера должен быть не менее 10x10 см</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Автоматическая печать при загрузке (опционально)
+        // window.addEventListener('load', () => {
+        //     setTimeout(() => window.print(), 1000);
+        // });
+    </script>
+</body>
+</html>

@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Новогодняя Елка - Базовая версия</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #container {
+            cursor: pointer;
+        }
+
+        #start-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            pointer-events: all;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        #start-button:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.4);
+        }
+
+        #instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            text-align: center;
+            font-size: 14px;
+            pointer-events: all;
+            max-width: 90%;
+            z-index: 10;
+        }
+
+        #mobile-instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            text-align: center;
+            font-size: 14px;
+            pointer-events: all;
+            max-width: 90%;
+            z-index: 10;
+        }
+
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            #instructions {
+                display: none; /* Скрываем десктопные инструкции на мобильных */
+            }
+            
+            #mobile-instructions {
+                display: block; /* Показываем мобильные инструкции */
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #status {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            pointer-events: all;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="canvas"></canvas>
+        
+        <div id="ui-overlay">
+            <button id="start-button">🎄 Запустить AR</button>
+            <button id="reset-button" class="hidden" style="position: absolute; top: 20px; right: 20px; background: #ff6b6b; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer;">🔄 Сброс</button>
+            <button id="lights-button" class="hidden" style="position: absolute; top: 20px; right: 100px; background: #4ecdc4; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer;">💡 Огни</button>
+            
+            <div id="status" class="hidden">
+                <div>Статус: <span id="status-text">Готов</span></div>
+            </div>
+            
+            <div id="instructions">
+                <div>📷 Наведите камеру на плоскую поверхность</div>
+                <div>🎯 <strong>Кликните для размещения елки</strong></div>
+                <div>🔄 <strong>Кликните снова для перемещения</strong></div>
+                <div>🔍 <strong>Колесо мыши для изменения размера</strong></div>
+                <div>💡 <strong>Кнопка "Огни" для праздничного освещения</strong></div>
+                <div>🎄 Случайная модель из ваших GLB файлов</div>
+                <div style="color: #4ecdc4; font-size: 12px; margin-top: 5px;">
+                    💡 После размещения: клик для перемещения, колесо для размера, кнопка для огней
+                </div>
+            </div>
+            
+            <div id="mobile-instructions" style="display: none;">
+                <div>📷 Наведите камеру на плоскую поверхность</div>
+                <div>🎯 <strong>Тапните для размещения елки</strong></div>
+                <div>🔄 <strong>Тапните снова для перемещения</strong></div>
+                <div>📱 <strong>Pinch-жест для изменения размера</strong></div>
+                <div>💡 <strong>Кнопка "Огни" для праздничного освещения</strong></div>
+                <div>🎄 Случайная модель из ваших GLB файлов</div>
+                <div style="color: #4ecdc4; font-size: 12px; margin-top: 5px;">
+                    💡 После размещения: тап для перемещения, pinch для размера, кнопка для огней
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GLTFLoader -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    
+    <script>
+        class BasicARApp {
+            constructor() {
+                this.video = null;
+                this.canvas = null;
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.treeModel = null;
+                this.isARActive = false;
+                this.treePlaced = false;
+                this.lightsOn = true; // Огни включены по умолчанию
+                
+                this.init();
+            }
+
+            async init() {
+                this.video = document.getElementById('video');
+                this.canvas = document.getElementById('canvas');
+                
+                this.setupEventListeners();
+                this.updateStatus('Инициализация завершена');
+            }
+
+            setupEventListeners() {
+                const startButton = document.getElementById('start-button');
+                const resetButton = document.getElementById('reset-button');
+                const lightsButton = document.getElementById('lights-button');
+                
+                if (startButton) {
+                    startButton.addEventListener('click', () => {
+                        this.startAR();
+                    });
+                }
+                
+                if (resetButton) {
+                    resetButton.addEventListener('click', () => {
+                        this.resetTree();
+                    });
+                }
+                
+                if (lightsButton) {
+                    lightsButton.addEventListener('click', () => {
+                        this.toggleHolidayLights();
+                    });
+                }
+
+            // Обработка кликов для размещения и перемещения елки
+            const container = document.getElementById('container');
+            if (container) {
+                container.addEventListener('click', (event) => {
+                    console.log('Клик зарегистрирован!', {
+                        isARActive: this.isARActive,
+                        treePlaced: this.treePlaced,
+                        target: event.target.tagName
+                    });
+                    
+                    if (this.isARActive) {
+                        if (!this.treePlaced) {
+                            console.log('Размещаем елку...');
+                            this.placeTree(event);
+                        } else {
+                            console.log('Перемещаем елку...');
+                            this.moveTree(event);
+                        }
+                    } else {
+                        console.log('AR не активен');
+                        this.updateStatus('AR не активен');
+                    }
+                });
+
+                // Обработка колеса мыши для изменения размера елки
+                container.addEventListener('wheel', (event) => {
+                    if (this.isARActive && this.treePlaced && this.treeModel) {
+                        event.preventDefault();
+                        
+                        // Определяем направление прокрутки
+                        const delta = event.deltaY > 0 ? -0.1 : 0.1;
+                        
+                        this.changeTreeSize(delta);
+                    }
+                });
+
+                // Обработка жестов для мобильных устройств
+                let initialDistance = 0;
+                let initialScale = 0.3;
+
+                container.addEventListener('touchstart', (event) => {
+                    if (this.isARActive && this.treePlaced && this.treeModel && event.touches.length === 2) {
+                        event.preventDefault();
+                        initialDistance = Math.hypot(
+                            event.touches[0].clientX - event.touches[1].clientX,
+                            event.touches[0].clientY - event.touches[1].clientY
+                        );
+                        initialScale = this.treeModel.scale.x;
+                    }
+                });
+
+                container.addEventListener('touchmove', (event) => {
+                    if (this.isARActive && this.treePlaced && this.treeModel && event.touches.length === 2) {
+                        event.preventDefault();
+                        
+                        const currentDistance = Math.hypot(
+                            event.touches[0].clientX - event.touches[1].clientX,
+                            event.touches[0].clientY - event.touches[1].clientY
+                        );
+                        
+                        const scaleChange = (currentDistance - initialDistance) / 100;
+                        const newScale = initialScale + scaleChange;
+                        
+                        this.treeModel.scale.set(newScale, newScale, newScale);
+                        
+                        // Ограничиваем размер
+                        const minScale = 0.1;
+                        const maxScale = 2.0;
+                        
+                        this.treeModel.scale.x = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.x));
+                        this.treeModel.scale.y = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.y));
+                        this.treeModel.scale.z = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.z));
+                        
+                        this.updateStatus(`🎄 Размер елки: ${(this.treeModel.scale.x * 100).toFixed(0)}%`);
+                    }
+                });
+            }
+            }
+
+            async startAR() {
+                try {
+                    this.updateStatus('Запуск камеры...');
+                    
+                    // Запрашиваем доступ к камере
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            facingMode: 'environment',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        } 
+                    });
+                    
+                    this.video.srcObject = stream;
+                    
+                    // Ждем загрузки видео
+                    this.video.addEventListener('loadedmetadata', () => {
+                        this.setupThreeJS();
+                        this.hideStartButton();
+                        this.showStatus(true);
+                        this.isARActive = true;
+                        this.updateStatus('AR активен - нажмите на экран для размещения елки');
+                    });
+                    
+                } catch (error) {
+                    console.error('Ошибка доступа к камере:', error);
+                    this.updateStatus('Ошибка: Не удалось получить доступ к камере');
+                }
+            }
+
+            async setupThreeJS() {
+                // Создаем сцену Three.js
+                this.scene = new THREE.Scene();
+                
+                // Создаем камеру
+                this.camera = new THREE.PerspectiveCamera(
+                    75, 
+                    window.innerWidth / window.innerHeight, 
+                    0.1, 
+                    1000
+                );
+                
+                // Создаем рендерер
+                this.renderer = new THREE.WebGLRenderer({ 
+                    canvas: this.canvas,
+                    alpha: true,
+                    antialias: true
+                });
+                
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                
+                // Загружаем GLB модель елки
+                await this.createTreeFromGLB();
+                
+                // Настраиваем освещение
+                this.setupLighting();
+                
+                // Запускаем рендеринг
+                this.animate();
+            }
+
+            async createTreeFromGLB() {
+                return new Promise((resolve, reject) => {
+                    // Список доступных GLB моделей
+                    const availableModels = [
+                        'tree.glb',
+                        '3december2020__train_set.glb',
+                        'christmas_gift_boxs.glb',
+                        'christmas_log.glb',
+                        'christmas_ornaments.glb',
+                        'christmas_present.glb',
+                        'new_year_marathon_day_4.glb',
+                        'snow_globe.glb',
+                        'tree_3december_day_22.glb'
+                    ];
+                    
+                    // Случайный выбор модели
+                    const randomModel = availableModels[Math.floor(Math.random() * availableModels.length)];
+                    console.log('Выбрана случайная модель:', randomModel);
+                    
+                    const loader = new THREE.GLTFLoader();
+                    loader.load(
+                        `./${randomModel}`,
+                        (gltf) => {
+                            this.treeModel = gltf.scene;
+                            
+                            // Настраиваем модель
+                            this.treeModel.scale.set(0.3, 0.3, 0.3);
+                            this.treeModel.visible = false;
+                            
+                            // Добавляем тени
+                            this.treeModel.traverse((child) => {
+                                if (child.isMesh) {
+                                    child.castShadow = true;
+                                    child.receiveShadow = true;
+                                }
+                            });
+                            
+                            // Добавляем случайные украшения только для елок
+                            if (randomModel.includes('tree')) {
+                                this.addRandomOrnaments();
+                            }
+                            
+                            this.scene.add(this.treeModel);
+                            console.log('GLB модель загружена:', randomModel);
+                            resolve();
+                        },
+                        (progress) => {
+                            console.log('Загрузка модели:', (progress.loaded / progress.total * 100) + '%');
+                        },
+                        (error) => {
+                            console.error('Ошибка загрузки GLB модели:', error);
+                            // Создаем простую елку как fallback
+                            this.createSimpleTree();
+                            resolve();
+                        }
+                    );
+                });
+            }
+
+            createSimpleTree() {
+                // Ствол елки (коричневый цилиндр)
+                const trunkGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.5, 8);
+                const trunkMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
+                const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                trunk.position.y = -0.25;
+                
+                // Иголки елки (зеленые конусы)
+                const needlesGeometry = new THREE.ConeGeometry(0.8, 1.5, 8);
+                const needlesMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+                const needles = new THREE.Mesh(needlesGeometry, needlesMaterial);
+                needles.position.y = 0.5;
+                
+                // Создаем группу для елки
+                this.treeModel = new THREE.Group();
+                this.treeModel.add(trunk);
+                this.treeModel.add(needles);
+                
+                // Добавляем украшения (цветные шары)
+                this.addDecorations();
+                
+                this.scene.add(this.treeModel);
+                this.treeModel.visible = false;
+            }
+
+            addDecorations() {
+                const colors = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF];
+                
+                for (let i = 0; i < 6; i++) {
+                    const ballGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+                    const ballMaterial = new THREE.MeshLambertMaterial({ 
+                        color: colors[i] 
+                    });
+                    const ball = new THREE.Mesh(ballGeometry, ballMaterial);
+                    
+                    // Случайное размещение на елке
+                    ball.position.set(
+                        (Math.random() - 0.5) * 1.2,
+                        Math.random() * 1.5 - 0.5,
+                        (Math.random() - 0.5) * 1.2
+                    );
+                    
+                    this.treeModel.add(ball);
+                }
+            }
+
+            setupLighting() {
+                // Окружающий свет
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+                this.scene.add(ambientLight);
+
+                // Основной направленный свет
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(10, 10, 5);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                this.scene.add(directionalLight);
+
+                // Праздничные огни вокруг елки
+                this.createHolidayLights();
+            }
+
+            createHolidayLights() {
+                // Создаем невидимые источники света по кругу с шагом 15 градусов (24 источника)
+                const numLights = 24; // 360 / 15 = 24 источника
+                
+                // Цвета для огней
+                const colors = [
+                    0xff4444, // Красный
+                    0xff8844, // Оранжевый
+                    0xffff44, // Желтый
+                    0x88ff44, // Светло-зеленый
+                    0x44ff44, // Зеленый
+                    0x44ff88, // Морской волны
+                    0x44ffff, // Голубой
+                    0x4488ff, // Синий
+                    0x8844ff, // Фиолетовый
+                    0xff44ff, // Розовый
+                    0xff4488, // Розово-красный
+                    0xff6666  // Светло-красный
+                ];
+                
+                this.holidayLights = [];
+
+                for (let i = 0; i < numLights; i++) {
+                    const color = colors[i % colors.length]; // Циклически используем цвета
+                    
+                    // Создаем невидимый источник света
+                    const pointLight = new THREE.PointLight(color, 1.2, 8);
+                    pointLight.visible = false; // Делаем невидимым
+                    pointLight.castShadow = true;
+                    this.scene.add(pointLight);
+                    this.holidayLights.push(pointLight);
+                }
+                
+                console.log('Невидимые праздничные огни созданы:', this.holidayLights.length);
+                
+                // Запускаем анимацию огней
+                this.animateHolidayLights();
+            }
+
+            animateHolidayLights() {
+                const animate = () => {
+                    if (this.holidayLights && this.holidayLights.length > 0 && this.treeModel) {
+                        const time = Date.now() * 0.001;
+                        
+                        // Получаем позицию и размер елки
+                        const treePosition = this.treeModel.position;
+                        const treeScale = this.treeModel.scale;
+                        
+                        // Базовый радиус и высота относительно размера елки
+                        const baseRadius = 1.5;
+                        const baseHeight = 0.8;
+                        const radius = baseRadius * Math.max(treeScale.x, treeScale.z);
+                        const height = baseHeight * treeScale.y;
+                        
+                        this.holidayLights.forEach((light, index) => {
+                            // Анимируем только если огни включены
+                            if (this.lightsOn) {
+                                // Позиционируем огни вокруг елки
+                                const angle = (index * 15) * Math.PI / 180; // 15 градусов в радианах
+                                const x = treePosition.x + Math.cos(angle) * radius;
+                                const z = treePosition.z + Math.sin(angle) * radius;
+                                const y = treePosition.y + height;
+                                
+                                light.position.set(x, y, z);
+                                
+                                // Мерцание интенсивности
+                                const flicker = Math.sin(time * 3 + index * 2) * 0.3 + 0.7;
+                                light.intensity = 1.2 * flicker;
+                            }
+                        });
+                        
+                        requestAnimationFrame(animate);
+                    }
+                };
+                animate();
+            }
+
+            placeTree(event) {
+                if (this.treePlaced) return;
+
+                // Получаем координаты клика
+                const rect = this.canvas.getBoundingClientRect();
+                const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                // Размещаем елку в 3D пространстве
+                this.treeModel.position.set(x * 2, y * 2, -2);
+                this.treeModel.visible = true;
+                this.treePlaced = true;
+
+                // Анимация появления
+                this.animateTreeAppearance();
+
+                this.updateStatus('🎄 Елка размещена! Кликните для перемещения');
+                
+                // Показываем кнопки управления
+                const resetButton = document.getElementById('reset-button');
+                const lightsButton = document.getElementById('lights-button');
+                if (resetButton) {
+                    resetButton.classList.remove('hidden');
+                }
+                if (lightsButton) {
+                    lightsButton.classList.remove('hidden');
+                }
+            }
+
+            moveTree(event) {
+                if (!this.treePlaced || !this.treeModel) return;
+
+                // Получаем координаты клика
+                const rect = this.canvas.getBoundingClientRect();
+                const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+                // Перемещаем елку в новую позицию
+                this.treeModel.position.set(x * 2, y * 2, -2);
+                
+                // Огни автоматически последуют за елкой в animateHolidayLights()
+                
+                console.log('Елка перемещена в позицию:', this.treeModel.position);
+                this.updateStatus('🎄 Елка перемещена!');
+            }
+
+            changeTreeSize(delta) {
+                if (!this.treePlaced || !this.treeModel) return;
+
+                // Изменяем размер елки
+                this.treeModel.scale.x += delta;
+                this.treeModel.scale.y += delta;
+                this.treeModel.scale.z += delta;
+                
+                // Ограничиваем размер
+                const minScale = 0.1;
+                const maxScale = 2.0;
+                
+                this.treeModel.scale.x = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.x));
+                this.treeModel.scale.y = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.y));
+                this.treeModel.scale.z = Math.max(minScale, Math.min(maxScale, this.treeModel.scale.z));
+                
+                console.log('Размер елки изменен:', this.treeModel.scale.x);
+                this.updateStatus(`🎄 Размер елки: ${(this.treeModel.scale.x * 100).toFixed(0)}%`);
+            }
+
+            animateTreeAppearance() {
+                const startScale = 0.1;
+                const endScale = 1;
+                const duration = 1000;
+                const startTime = Date.now();
+
+                const animate = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    const currentScale = startScale + (endScale - startScale) * easeOut;
+                    
+                    this.treeModel.scale.set(currentScale, currentScale, currentScale);
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Запускаем вращение
+                        this.startTreeRotation();
+                    }
+                };
+                
+                this.treeModel.scale.set(startScale, startScale, startScale);
+                animate();
+            }
+
+            startTreeRotation() {
+                const animate = () => {
+                    if (this.treeModel && this.treeModel.visible) {
+                        this.treeModel.rotation.y += 0.01;
+                        requestAnimationFrame(animate);
+                    }
+                };
+                animate();
+            }
+
+            resetTree() {
+                if (this.treeModel) {
+                    this.treeModel.visible = false;
+                    this.treeModel.scale.set(0.3, 0.3, 0.3); // Сбрасываем к исходному размеру
+                    this.treeModel.rotation.set(0, 0, 0);
+                }
+                this.treePlaced = false;
+                this.updateStatus('AR активен - кликните для размещения елки');
+                console.log('Елка сброшена');
+            }
+
+            toggleHolidayLights() {
+                if (!this.holidayLights) return;
+
+                const lightsButton = document.getElementById('lights-button');
+                if (!lightsButton) return;
+
+                // Переключаем состояние
+                this.lightsOn = !this.lightsOn;
+                
+                this.holidayLights.forEach(light => {
+                    if (this.lightsOn) {
+                        // Включаем огни
+                        light.intensity = 1.5;
+                    } else {
+                        // Выключаем огни
+                        light.intensity = 0;
+                    }
+                });
+
+                // Обновляем текст кнопки
+                if (this.lightsOn) {
+                    lightsButton.textContent = '💡 Огни ВКЛ';
+                    lightsButton.style.background = '#4ecdc4';
+                    this.updateStatus('🎄 Праздничные огни включены!');
+                } else {
+                    lightsButton.textContent = '💡 Огни ВЫКЛ';
+                    lightsButton.style.background = '#666';
+                    this.updateStatus('🎄 Праздничные огни выключены');
+                }
+
+                console.log('Огни переключены:', this.lightsOn);
+            }
+
+
+            animate() {
+                if (this.renderer && this.scene && this.camera) {
+                    this.renderer.render(this.scene, this.camera);
+                }
+                requestAnimationFrame(() => this.animate());
+            }
+
+
+            // UI методы
+            hideStartButton() {
+                const startButton = document.getElementById('start-button');
+                if (startButton) {
+                    startButton.classList.add('hidden');
+                }
+            }
+
+            showStatus(show) {
+                const status = document.getElementById('status');
+                if (status) {
+                    if (show) {
+                        status.classList.remove('hidden');
+                    } else {
+                        status.classList.add('hidden');
+                    }
+                }
+            }
+
+            updateStatus(message) {
+                const statusText = document.getElementById('status-text');
+                if (statusText) {
+                    statusText.textContent = message;
+                }
+                console.log('Статус:', message);
+            }
+        }
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', () => {
+            new BasicARApp();
+        });
+    </script>
+</body>
+</html>
