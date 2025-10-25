@@ -264,9 +264,10 @@
                     });
                 }
 
-            // Обработка кликов для размещения и перемещения елки
+            // Обработка кликов и тапов для размещения и перемещения елки
             const container = document.getElementById('container');
             if (container) {
+                // Обработчик для кликов (десктоп)
                 container.addEventListener('click', (event) => {
                     console.log('Клик зарегистрирован!', {
                         isARActive: this.isARActive,
@@ -296,6 +297,41 @@
                         this.updateStatus('AR не активен');
                     }
                 });
+
+                // Обработчик для тапов (мобильные устройства)
+                container.addEventListener('touchstart', (event) => {
+                    console.log('Тап зарегистрирован!', {
+                        isARActive: this.isARActive,
+                        treePlaced: this.treePlaced,
+                        target: event.target.tagName,
+                        touches: event.touches.length
+                    });
+                    
+                    // Игнорируем тапы по кнопкам и другим UI элементам
+                    if (event.target.tagName === 'BUTTON' || 
+                        event.target.closest('button') || 
+                        event.target.closest('#instructions') ||
+                        event.target.closest('#mobile-instructions')) {
+                        console.log('Тап по кнопке или инструкции - игнорируем');
+                        return;
+                    }
+                    
+                    // Предотвращаем срабатывание click события
+                    event.preventDefault();
+                    
+                    if (this.isARActive) {
+                        if (!this.treePlaced) {
+                            console.log('Размещаем елку (тап)...');
+                            this.placeTree(event);
+                        } else {
+                            console.log('Перемещаем елку (тап)...');
+                            this.moveTree(event);
+                        }
+                    } else {
+                        console.log('AR не активен');
+                        this.updateStatus('AR не активен');
+                    }
+                }, { passive: false });
 
                 // Обработка колеса мыши для изменения размера елки
                 container.addEventListener('wheel', (event) => {
