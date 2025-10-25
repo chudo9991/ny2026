@@ -233,14 +233,18 @@
                     this.camera.updateProjectionMatrix();
                     
                     this.renderer.setSize(window.innerWidth, window.innerHeight);
-                    this.renderer.setPixelRatio(window.devicePixelRatio);
+                    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                     
-                    // Адаптируем размер модели под новый размер экрана
-                    if (this.treeModel && this.treePlaced) {
-                        const newScale = this.getAdaptiveScale();
-                        const currentScale = this.treeModel.scale.x;
-                        const ratio = newScale / 0.3; // 0.3 - базовый масштаб для десктопа
-                        this.treeModel.scale.multiplyScalar(ratio / (currentScale / 0.3));
+                    // Обновляем масштаб модели при изменении размера экрана
+                    if (this.treeModel) {
+                        const baseNorm = this.treeModel.userData.normScale || 1;
+                        const newDeviceScale = this.getAdaptiveScale();
+                        const target = baseNorm * newDeviceScale;
+                        this.treeModel.userData.targetScale = target;
+                        // Если уже размещено - применяем целевой масштаб
+                        if (this.treePlaced) {
+                            this.treeModel.scale.set(target, target, target);
+                        }
                     }
                 }
             }
@@ -425,7 +429,7 @@
                 });
                 
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 this.renderer.shadowMap.enabled = true;
                 this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 
@@ -452,6 +456,30 @@
                     return 0.3; // Десктоп
                 }
             }
+            
+            normalizeGLTF(scene) {
+                // Считаем bbox для нормализации модели
+                const box = new THREE.Box3().setFromObject(scene);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+                
+                // Создаем обёртку с правильным центром
+                const wrapper = new THREE.Group();
+                
+                // Сдвигаем геометрию так, чтобы центр оказался в (0,0,0)
+                scene.position.sub(center);
+                wrapper.add(scene);
+                
+                // Нормализуем высоту до 1.0 мировых единиц
+                const targetHeight = 1.0;
+                const h = size.y || 1.0;
+                const normScale = targetHeight / h;
+                wrapper.scale.setScalar(normScale);
+                
+                // Сохраняем нормализованный масштаб для дальнейшего использования
+                wrapper.userData.normScale = normScale;
+                return wrapper;
+            }
 
             async createTreeFromGLB() {
                 return new Promise((resolve, reject) => {
@@ -474,11 +502,17 @@
                     loader.load(
                         `./${randomModel}`,
                         (gltf) => {
-                            this.treeModel = gltf.scene;
+                            // Нормализуем модель (центрирование + одинаковый размер)
+                            const normalized = this.normalizeGLTF(gltf.scene);
+                            this.treeModel = normalized;
                             
-                            // Настраиваем модель с адаптивным масштабом
-                            const scale = this.getAdaptiveScale();
-                            this.treeModel.scale.set(scale, scale, scale);
+                            // Применяем адаптивный масштаб для устройства
+                            const deviceScale = this.getAdaptiveScale();
+                            this.treeModel.scale.multiplyScalar(deviceScale);
+                            
+                            // Сохраняем целевой масштаб для анимаций
+                            this.treeModel.userData.targetScale = this.treeModel.scale.x;
+                            
                             this.treeModel.visible = false;
                             
                             // Добавляем тени
@@ -488,8 +522,6 @@
                                     child.receiveShadow = true;
                                 }
                             });
-                            
-                            // Украшения уже есть в GLB модели
                             
                             this.scene.add(this.treeModel);
                             resolve();
@@ -700,9 +732,7 @@
                         y = normalizedY * 0.5;
                     }
                     
-                    const baseZ = -3;
-                    const aspectRatio = window.innerWidth / window.innerHeight;
-                    adjustedZ = baseZ * (1 / aspectRatio);
+                    adjustedZ = -3.5; // Фиксированный Z для предсказуемости
                 }
                 
                 this.treeModel.position.set(x, y, adjustedZ);
@@ -761,10 +791,8 @@
                     y = normalizedY * 0.5;
                 }
 
-                // Перемещаем елку в новую позицию с учетом размера экрана
-                const baseZ = -3;
-                const aspectRatio = window.innerWidth / window.innerHeight;
-                const adjustedZ = baseZ * (1 / aspectRatio);
+                // Перемещаем елку в новую позицию с фиксированным Z
+                const adjustedZ = -3.5; // Фиксированный Z
                 
                 this.treeModel.position.set(x, y, adjustedZ);
                 
@@ -793,9 +821,9 @@
             }
 
             animateTreeAppearance() {
-                // Сохраняем исходный масштаб модели
-                const startScale = 0.1;
-                const endScale = 0.3; // Возвращаемся к исходному размеру 0.3
+                // Используем целевой масштаб вместо захардкоженного 0.3
+                const finalScale = this.treeModel.userData?.targetScale ?? this.getAdaptiveScale();
+                const startScale = finalScale * 0.33; // Начинаем с трети целевого размера
                 const duration = 1000;
                 const startTime = Date.now();
 
@@ -804,7 +832,7 @@
                     const progress = Math.min(elapsed / duration, 1);
                     
                     const easeOut = 1 - Math.pow(1 - progress, 3);
-                    const currentScale = startScale + (endScale - startScale) * easeOut;
+                    const currentScale = startScale + (finalScale - startScale) * easeOut;
                     
                     this.treeModel.scale.set(currentScale, currentScale, currentScale);
                     
