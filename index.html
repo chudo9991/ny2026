@@ -705,6 +705,15 @@
                 this.treeModel.position.set(x * 1.5, y * 1.5 - 1, -2.5);
                 this.treeModel.visible = true;
                 this.treePlaced = true;
+                
+                // Логируем детали размещения
+                this.updateStatus(`Размещено: pos(${this.treeModel.position.x.toFixed(2)}, ${this.treeModel.position.y.toFixed(2)}, ${this.treeModel.position.z.toFixed(2)}), scale: ${this.treeModel.scale.x.toFixed(2)}, visible: ${this.treeModel.visible}`);
+                console.log('Модель размещена:', {
+                    position: this.treeModel.position,
+                    scale: this.treeModel.scale,
+                    visible: this.treeModel.visible,
+                    children: this.treeModel.children.length
+                });
 
                 // Анимация появления
                 this.animateTreeAppearance();
