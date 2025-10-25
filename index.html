@@ -225,10 +225,13 @@
             handleResize() {
                 // Обновляем размер камеры и рендерера
                 if (this.camera && this.renderer) {
-                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    const canvasWidth = this.canvas.clientWidth || window.innerWidth;
+                    const canvasHeight = this.canvas.clientHeight || window.innerHeight;
+                    
+                    this.camera.aspect = canvasWidth / canvasHeight;
                     this.camera.updateProjectionMatrix();
                     
-                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                    this.renderer.setSize(canvasWidth, canvasHeight, false);
                     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                     
                     // Обновляем масштаб модели при изменении размера экрана
@@ -409,10 +412,14 @@
                 // Создаем сцену Three.js
                 this.scene = new THREE.Scene();
                 
+                // Получаем реальные размеры canvas для правильного соотношения сторон
+                const canvasWidth = this.canvas.clientWidth || window.innerWidth;
+                const canvasHeight = this.canvas.clientHeight || window.innerHeight;
+                
                 // Создаем камеру
                 this.camera = new THREE.PerspectiveCamera(
                     75, 
-                    window.innerWidth / window.innerHeight, 
+                    canvasWidth / canvasHeight, 
                     0.1, 
                     1000
                 );
@@ -424,7 +431,7 @@
                     antialias: true
                 });
                 
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setSize(canvasWidth, canvasHeight, false);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 this.renderer.shadowMap.enabled = true;
                 this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
