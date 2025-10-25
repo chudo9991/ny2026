@@ -208,13 +208,19 @@
                 }
                 
                 if (resetButton) {
-                    resetButton.addEventListener('click', () => {
+                    resetButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Reset button clicked');
                         this.resetTree();
                     });
                 }
                 
                 if (lightsButton) {
-                    lightsButton.addEventListener('click', () => {
+                    lightsButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Lights button clicked');
                         this.toggleHolidayLights();
                     });
                 }
@@ -679,26 +685,58 @@
             }
 
             resetTree() {
+                console.log('=== ФУНКЦИЯ RESET ВЫЗВАНА ===');
+                
+                // Удаляем текущую модель из сцены
                 if (this.treeModel) {
-                    this.treeModel.visible = false;
-                    this.treeModel.scale.set(0.3, 0.3, 0.3); // Сбрасываем к исходному размеру
-                    this.treeModel.rotation.set(0, 0, 0);
+                    console.log('Удаляем модель из сцены');
+                    this.scene.remove(this.treeModel);
+                    this.treeModel = null;
+                } else {
+                    console.log('Модели нет для удаления');
                 }
+                
+                // Отключаем огни
+                if (this.holidayLights && this.holidayLights.length > 0) {
+                    console.log('Удаляем', this.holidayLights.length, 'огней');
+                    this.holidayLights.forEach(light => {
+                        this.scene.remove(light);
+                    });
+                    this.holidayLights = [];
+                } else {
+                    console.log('Огней нет для удаления');
+                }
+                
                 this.treePlaced = false;
-                this.updateStatus('AR активен - кликните для размещения елки');
-                console.log('Елка сброшена');
+                
+                // Загружаем новую случайную модель
+                console.log('Загружаем новую модель...');
+                this.createTreeFromGLB();
+                
+                this.updateStatus('AR активен - кликните для размещения объекта');
+                console.log('=== СБРОС ЗАВЕРШЕН ===');
             }
 
             toggleHolidayLights() {
-                if (!this.holidayLights) return;
+                console.log('=== ФУНКЦИЯ TOGGLE LIGHTS ВЫЗВАНА ===');
+                
+                if (!this.holidayLights || this.holidayLights.length === 0) {
+                    console.log('ОШИБКА: Огней нет!', this.holidayLights);
+                    return;
+                }
 
                 const lightsButton = document.getElementById('lights-button');
-                if (!lightsButton) return;
+                if (!lightsButton) {
+                    console.log('ОШИБКА: Кнопка не найдена!');
+                    return;
+                }
 
                 // Переключаем состояние
                 this.lightsOn = !this.lightsOn;
+                console.log('Состояние огней переключено на:', this.lightsOn);
+                console.log('Количество огней:', this.holidayLights.length);
                 
-                this.holidayLights.forEach(light => {
+                this.holidayLights.forEach((light, index) => {
                     if (this.lightsOn) {
                         // Включаем огни
                         light.intensity = 1.5;
@@ -706,6 +744,7 @@
                         // Выключаем огни
                         light.intensity = 0;
                     }
+                    console.log(`Огонь ${index}: intensity = ${light.intensity}`);
                 });
 
                 // Обновляем текст кнопки
@@ -719,7 +758,7 @@
                     this.updateStatus('🎄 Праздничные огни выключены');
                 }
 
-                console.log('Огни переключены:', this.lightsOn);
+                console.log('=== ПЕРЕКЛЮЧЕНИЕ ЗАВЕРШЕНО ===');
             }
 
 
