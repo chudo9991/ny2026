@@ -483,14 +483,23 @@
 
             async createTreeFromGLB() {
                 return new Promise((resolve, reject) => {
-                    // Список доступных GLB моделей
-                    const availableModels = [
-                        'tree.glb',
-                        'christmas_log.glb',
-                        'christmas_present.glb',
-                        'snow_globe.glb',
-                        'tree_3december_day_22.glb'
-                    ];
+                    // Разные наборы моделей для мобильных и десктопа
+                    const isMobile = window.innerWidth < 768;
+                    let availableModels;
+                    
+                    if (isMobile) {
+                        // Для мобильных - только одна модель
+                        availableModels = ['tree_3december_day_22.glb'];
+                    } else {
+                        // Для десктопа - все модели
+                        availableModels = [
+                            'tree.glb',
+                            'christmas_log.glb',
+                            'christmas_present.glb',
+                            'snow_globe.glb',
+                            'tree_3december_day_22.glb'
+                        ];
+                    }
                     
                     // Случайный выбор модели
                     const randomModel = availableModels[Math.floor(Math.random() * availableModels.length)];
@@ -715,7 +724,7 @@
                         this.updateStatus(`Мобильный альбом: модель в центре, 25% высоты экрана`);
                     }
                 } else {
-                    // Десктоп или горизонтальная ориентация - используем старую логику
+                    // Десктоп - без ограничений, размещаем в точной позиции клика
                     const rect = this.canvas.getBoundingClientRect();
                     const clientX = event.clientX ?? event.touches[0]?.clientX ?? 0;
                     const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
@@ -723,16 +732,11 @@
                     const normalizedX = ((clientX - rect.left) / rect.width) * 2 - 1;
                     const normalizedY = -((clientY - rect.top) / rect.height) * 2 + 1;
                     
-                    if (isPortrait) {
-                        const aspectRatio = window.innerWidth / window.innerHeight;
-                        x = normalizedX * 0.8 * aspectRatio;
-                        y = normalizedY * 0.8;
-                    } else {
-                        x = normalizedX * 0.8;
-                        y = normalizedY * 0.5;
-                    }
+                    // Без ограничений - используем точные координаты клика
+                    x = normalizedX;
+                    y = normalizedY;
                     
-                    adjustedZ = -3.5; // Фиксированный Z для предсказуемости
+                    adjustedZ = -3.5; // Фиксированный Z
                 }
                 
                 this.treeModel.position.set(x, y, adjustedZ);
@@ -766,34 +770,39 @@
             moveTree(event) {
                 if (!this.treePlaced || !this.treeModel) return;
 
-                // Получаем координаты клика/тапа (поддержка и мыши, и тача)
+                // Проверяем, мобильное ли это устройство
+                const isMobile = window.innerWidth < 768;
+                
+                // Получаем координаты клика/тапа
                 const rect = this.canvas.getBoundingClientRect();
                 const clientX = event.clientX ?? event.touches[0]?.clientX ?? 0;
                 const clientY = event.clientY ?? event.touches[0]?.clientY ?? 0;
                 
-                // Нормализуем координаты с учетом размера экрана
+                // Нормализуем координаты
                 const normalizedX = ((clientX - rect.left) / rect.width) * 2 - 1;
                 const normalizedY = -((clientY - rect.top) / rect.height) * 2 + 1;
                 
-                // Учитываем ориентацию экрана
-                const isPortrait = window.innerHeight > window.innerWidth;
                 let x, y;
                 
-                if (isPortrait) {
-                    // Вертикальная ориентация (мобильный)
-                    // Учитываем соотношение сторон экрана
-                    const aspectRatio = window.innerWidth / window.innerHeight;
-                    x = normalizedX * 0.8 * aspectRatio; // Корректируем по aspect ratio
-                    y = normalizedY * 0.8; // Оставляем больше места по вертикали
+                if (isMobile) {
+                    // Мобильные - сохраняем те же координаты
+                    const isPortrait = window.innerHeight > window.innerWidth;
+                    if (isPortrait) {
+                        const aspectRatio = window.innerWidth / window.innerHeight;
+                        x = normalizedX * 0.8 * aspectRatio;
+                        y = normalizedY * 0.8;
+                    } else {
+                        x = normalizedX * 0.8;
+                        y = normalizedY * 0.5;
+                    }
                 } else {
-                    // Горизонтальная ориентация
-                    x = normalizedX * 0.8;
-                    y = normalizedY * 0.5;
+                    // Десктоп - без ограничений, точные координаты
+                    x = normalizedX;
+                    y = normalizedY;
                 }
-
-                // Перемещаем елку в новую позицию с фиксированным Z
-                const adjustedZ = -3.5; // Фиксированный Z
                 
+                // Перемещаем елку в новую позицию
+                const adjustedZ = -3.5;
                 this.treeModel.position.set(x, y, adjustedZ);
                 
                 // Огни автоматически последуют за елкой в animateHolidayLights()
